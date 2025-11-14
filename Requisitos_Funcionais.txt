@@ -1,0 +1,33 @@
+# REQUISITOS FUNCIONAIS
+# Sistema de Gerenciamento de Estoque de Materiais de Construção
+# Data: 14 de Novembro de 2025
+
+
+
+
+
+
+
+## RF01 - Autenticação de Usuários
+O sistema deve permitir que usuários se autentiquem usando username e senha.
+
+## RF02 - Gerenciamento de Categorias
+O sistema deve permitir o cadastro, visualização, edição e exclusão de categorias de produtos.
+
+## RF03 - Cadastro de Produtos
+O sistema deve permitir o cadastro de novos produtos no estoque.
+
+## RF04 - Controle de Movimentações de Estoque
+O sistema deve registrar todas as movimentações de entrada e saída de produtos.
+
+## RF05 - Visualização do Dashboard
+O sistema deve exibir um painel com informações resumidas do estoque.
+
+## RF06 - Alerta de Estoque Baixo
+O sistema deve alertar quando produtos atingem o estoque mínimo.
+
+## RF07 - Relatório de Produtos
+O sistema deve permitir visualizar lista completa de produtos com filtros.
+
+## RF08 - Edição e Exclusão de Produtos
+O sistema deve permitir editar informações e excluir produtos do sistema.

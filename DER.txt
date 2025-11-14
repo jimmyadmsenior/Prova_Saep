@@ -1,0 +1,54 @@
+# DIAGRAMA ENTIDADE-RELACIONAMENTO (DER)
+
+## ENTIDADES DO SISTEMA
+
+### 1. USUARIOS
+
+| Campo         | Tipo           | Restrições           |
+|---------------|----------------|----------------------|
+| id            | INT            | PK, AUTO_INCREMENT   |
+| username      | VARCHAR(50)    | ÚNICO, Obrigatório   |
+| password      | VARCHAR        | Obrigatório          |
+| nome          | VARCHAR        | Obrigatório          |
+| data_criacao  | TIMESTAMP      |                      |
+
+### 2. CATEGORIAS
+
+| Campo      | Tipo         | Restrições           |
+|------------|--------------|----------------------|
+| id         | INT          | PK, AUTO_INCREMENT   |
+| nome       | VARCHAR(100) | Obrigatório          |
+| descricao  | TEXT         | Opcional             |
+
+### 3. PRODUTOS
+
+| Campo                | Tipo           | Restrições           |
+|----------------------|----------------|----------------------|
+| id                   | INT            | PK, AUTO_INCREMENT   |
+| nome                 | VARCHAR        |                      |
+| categoria_id         | INT            | FK, Opcional         |
+| unidade_medida       | VARCHAR        |                      |
+| quantidade_disponivel| INT            |                      |
+| estoque_minimo       | INT            |                      |
+| preco_unitario       | DECIMAL        |                      |
+| data_validade        | DATE           | Opcional             |
+| descricao            | TEXT           | Opcional             |
+| data_criacao         | TIMESTAMP      |                      |
+
+### 4. MOVIMENTACOES_ESTOQUE
+
+| Campo            | Tipo        | Restrições           |
+|------------------|-------------|----------------------|
+| id               | INT         | PK, AUTO_INCREMENT   |
+| produto_id       | INT         | FK                   |
+| usuario_id       | INT         | FK                   |
+| tipo_movimentacao| ENUM        | Obrigatório          |
+| quantidade       | INT         |                      |
+| motivo           | VARCHAR     | Opcional             |
+| data_movimentacao| TIMESTAMP   |                      |
+
+## RELACIONAMENTOS ENTRE AS TABELAS
+
+USUARIOS (1) ----registra----> (N) MOVIMENTACOES_ESTOQUE
+CATEGORIAS (1) --classifica--> (N) PRODUTOS  
+PRODUTOS (1) ----movimenta---> (N) MOVIMENTACOES_ESTOQUE

@@ -1,0 +1,86 @@
+# CASOS DE TESTE
+# Sistema de Gerenciamento de Estoque SAEP
+# Data: 14 de Novembro de 2025
+
+## CT001 - Teste de Autenticação de Usuários (RF01)
+
+| ID Caso de Teste | ID Requisito Funcional | Descrição | Precondição | Passos | Resultado Esperado |
+|------------------|-------------------------|-----------|-------------|--------|-------------------|
+| CT001.1 | RF01 | Login com credenciais válidas | Usuário 'admin' cadastrado no sistema | 1. Acessar página de login<br>2. Inserir username: 'admin'<br>3. Inserir password: 'password'<br>4. Clicar em 'Entrar' | Sistema autentica usuário e redireciona para dashboard |
+
+---
+
+## CT002 - Teste de Gerenciamento de Categorias (RF02)
+
+| ID Caso de Teste | ID Requisito Funcional | Descrição | Precondição | Passos | Resultado Esperado |
+|------------------|-------------------------|-----------|-------------|--------|-------------------|
+| CT002.1 | RF02 | Cadastro de nova categoria | Usuário autenticado | 1. Acessar seção de categorias<br>2. Clicar em 'Nova Categoria'<br>3. Preencher nome: 'Ferramentas'<br>4. Preencher descrição: 'Ferramentas diversas'<br>5. Salvar | Categoria criada e exibida na lista |
+
+---
+
+## CT003 - Teste de Cadastro de Produtos (RF03)
+
+| ID Caso de Teste | ID Requisito Funcional | Descrição | Precondição | Passos | Resultado Esperado |
+|------------------|-------------------------|-----------|-------------|--------|-------------------|
+| CT003.1 | RF03 | Cadastro de produto completo | Usuário autenticado e categoria 'Cimento' existe | 1. Acessar página de produtos<br>2. Clicar em 'Adicionar Produto'<br>3. Nome: 'Cimento Portland'<br>4. Categoria: 'Cimento'<br>5. Unidade: 'Saco'<br>6. Preço: '25.90'<br>7. Salvar | Produto cadastrado e aparece na lista com quantidade 0 |
+
+---
+
+## CT004 - Teste de Controle de Movimentações (RF04)
+
+| ID Caso de Teste | ID Requisito Funcional | Descrição | Precondição | Passos | Resultado Esperado |
+|------------------|-------------------------|-----------|-------------|--------|-------------------|
+| CT004.1 | RF04 | Entrada de estoque válida | Usuário autenticado e produto 'Cimento Portland' existe | 1. Acessar movimentações<br>2. Selecionar produto: 'Cimento Portland'<br>3. Tipo: 'Entrada'<br>4. Quantidade: '100'<br>5. Motivo: 'Compra inicial'<br>6. Salvar | Estoque atualizado para 100, movimentação registrada |
+
+---
+
+## CT005 - Teste de Visualização do Dashboard (RF05)
+
+| ID Caso de Teste | ID Requisito Funcional | Descrição | Precondição | Passos | Resultado Esperado |
+|------------------|-------------------------|-----------|-------------|--------|-------------------|
+| CT005.1 | RF05 | Exibição de totais corretos | Sistema com 5 produtos cadastrados e 10 movimentações | 1. Fazer login<br>2. Acessar dashboard | Dashboard exibe: Total Produtos: 5, Total Movimentações: 10 |
+
+---
+
+## CT006 - Teste de Alerta de Estoque Baixo (RF06)
+
+| ID Caso de Teste | ID Requisito Funcional | Descrição | Precondição | Passos | Resultado Esperado |
+|------------------|-------------------------|-----------|-------------|--------|-------------------|
+| CT006.1 | RF06 | Alerta quando estoque = mínimo | Produto com estoque mínimo 5 e quantidade atual 5 | 1. Acessar dashboard<br>2. Verificar seção de alertas | Produto aparece na lista 'Produtos com Estoque Baixo' |
+
+---
+
+## CT007 - Teste de Relatório de Produtos (RF07)
+
+| ID Caso de Teste | ID Requisito Funcional | Descrição | Precondição | Passos | Resultado Esperado |
+|------------------|-------------------------|-----------|-------------|--------|-------------------|
+| CT007.1 | RF07 | Listagem completa de produtos | Sistema com 3 produtos cadastrados | 1. Acessar página de produtos<br>2. Verificar lista | Todos os 3 produtos exibidos com nome, categoria, estoque e preço |
+
+---
+
+## CT008 - Teste de Edição e Exclusão de Produtos (RF08)
+
+| ID Caso de Teste | ID Requisito Funcional | Descrição | Precondição | Passos | Resultado Esperado |
+|------------------|-------------------------|-----------|-------------|--------|-------------------|
+| CT008.1 | RF08 | Edição de produto existente | Produto 'Cimento Portland' cadastrado | 1. Localizar produto na lista<br>2. Clicar em 'Editar'<br>3. Alterar preço para '30.00'<br>4. Salvar alterações | Produto atualizado com novo preço na lista |
+
+---
+
+## RESUMO DOS CASOS DE TESTE
+
+**Total de Casos de Teste**: 8 casos
+**Distribuição por Requisito**:
+- RF01 (Autenticação): 1 caso
+- RF02 (Categorias): 1 caso  
+- RF03 (Cadastro Produtos): 1 caso
+- RF04 (Movimentações): 1 caso
+- RF05 (Dashboard): 1 caso
+- RF06 (Alertas): 1 caso
+- RF07 (Relatórios): 1 caso
+- RF08 (Edição/Exclusão): 1 caso
+
+**Tipos de Teste Cobertos**:
+- ✅ Casos de sucesso (cenários válidos)
+- ✅ Integração entre funcionalidades
+
+Todos os casos de teste seguem o padrão com ID único, referência ao requisito funcional, descrição clara, precondições, passos detalhados e resultado esperado específico.
