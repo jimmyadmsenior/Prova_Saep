@@ -74,7 +74,6 @@ class ProductAPI {
     
     private function createProduct() {
         try {
-            // Log da requisição recebida
             $rawInput = file_get_contents('php://input');
             error_log('Dados recebidos na API: ' . $rawInput);
             
@@ -95,7 +94,6 @@ class ProductAPI {
                 throw new Exception('Erro de conexão com o banco');
             }
             
-            // Buscar ou criar categoria
             $categoriaId = $this->getCategoriaId($conn, $input['categoria'] ?? 'Outros');
             
             $stmt = $conn->prepare("
@@ -108,9 +106,9 @@ class ProductAPI {
                 trim($input['descricao'] ?? ''),
                 $categoriaId,
                 floatval($input['preco_unitario'] ?? 0),
-                intval($input['quantidade_estoque'] ?? 0), // JavaScript envia como quantidade_estoque
+                intval($input['quantidade_estoque'] ?? 0),
                 intval($input['estoque_minimo'] ?? 5),
-                'unidade' // Valor padrão para unidade_medida
+                'unidade'
             ]);
             
             if (!$result) {
@@ -120,7 +118,6 @@ class ProductAPI {
             $productId = $conn->lastInsertId();
             error_log('Produto criado com ID: ' . $productId);
             
-            // Registrar movimentação inicial se houver estoque
             if (!empty($input['quantidade_estoque']) && $input['quantidade_estoque'] > 0) {
                 $this->registrarMovimentacao($conn, $productId, 'entrada', $input['quantidade_estoque'], 'Estoque inicial');
             }
@@ -165,10 +162,8 @@ class ProductAPI {
                 throw new Exception('Erro de conexão com o banco');
             }
             
-            // Buscar ou criar categoria
             $categoriaId = $this->getCategoriaId($conn, $input['categoria'] ?? 'Outros');
             
-            // Buscar quantidade atual para comparar
             $stmt = $conn->prepare("SELECT quantidade_disponivel FROM produtos WHERE id = ?");
             $stmt->execute([$input['id']]);
             $produtoAtual = $stmt->fetch();
@@ -180,7 +175,6 @@ class ProductAPI {
             $quantidadeAtual = $produtoAtual['quantidade_disponivel'];
             $novaQuantidade = intval($input['stock'] ?? $input['quantidade_estoque'] ?? 0);
             
-            // Atualizar produto
             $stmt = $conn->prepare("
                 UPDATE produtos SET 
                     nome = ?, 
@@ -206,7 +200,6 @@ class ProductAPI {
                 throw new Exception('Falha ao atualizar produto no banco');
             }
             
-            // Registrar movimentação se a quantidade mudou
             if ($quantidadeAtual != $novaQuantidade) {
                 $diferenca = $novaQuantidade - $quantidadeAtual;
                 $tipo = $diferenca > 0 ? 'entrada' : 'saida';
@@ -247,7 +240,6 @@ class ProductAPI {
                 throw new Exception('Erro de conexão com o banco');
             }
             
-            // Verificar se o produto existe
             $stmt = $conn->prepare("SELECT id, nome FROM produtos WHERE id = ?");
             $stmt->execute([$id]);
             $produto = $stmt->fetch();
@@ -256,11 +248,9 @@ class ProductAPI {
                 throw new Exception('Produto não encontrado');
             }
             
-            // Excluir movimentações primeiro (integridade referencial)
             $stmt = $conn->prepare("DELETE FROM movimentacoes_estoque WHERE produto_id = ?");
             $stmt->execute([$id]);
             
-            // Excluir produto
             $stmt = $conn->prepare("DELETE FROM produtos WHERE id = ?");
             $result = $stmt->execute([$id]);
             
@@ -294,7 +284,6 @@ class ProductAPI {
             return $categoria['id'];
         }
         
-        // Criar nova categoria se não existir
         $stmt = $conn->prepare("INSERT INTO categorias (nome) VALUES (?)");
         $stmt->execute([$nomeCategoria]);
         return $conn->lastInsertId();
@@ -310,7 +299,6 @@ class ProductAPI {
     }
 }
 
-// Executar API
 $api = new ProductAPI();
 $api->handleRequest();
 ?>

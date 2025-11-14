@@ -1,14 +1,10 @@
-// Sistema de Gerenciamento de Estoque - SAEP DB
-// Simulação de banco de dados usando localStorage
-
 class SaepDB {
     constructor() {
-        this.useAPI = true; // Sempre tentar usar API
+        this.useAPI = true;
         this.initializeDefaultData();
         this.checkAPIConnection();
     }
 
-    // Verificar conexão com API
     async checkAPIConnection() {
         try {
             const response = await fetch('backend/api/products.php', {
@@ -17,7 +13,6 @@ class SaepDB {
                     'Content-Type': 'application/json'
                 }
             });
-            
             if (response.ok) {
                 console.log('API conectada com sucesso ao MySQL');
                 this.useAPI = true;
@@ -31,49 +26,43 @@ class SaepDB {
         }
     }
 
-    // Inicializar dados padrão se não existirem
     initializeDefaultData() {
-        // Criar 3 usuários padrão se não existirem
         const users = JSON.parse(localStorage.getItem('saep_users') || '[]');
         if (users.length === 0) {
             const defaultUsers = [
                 {
                     id: 1,
                     username: 'admin',
-                    password: this.hashPassword('123456'), // Senha com hash
+                    password: this.hashPassword('123456'),
                     name: 'Administrador'
                 },
                 {
                     id: 2,
                     username: 'peluxo',
-                    password: this.hashPassword('123456'), // Senha com hash
+                    password: this.hashPassword('123456'),
                     name: 'Peluxo'
                 },
                 {
                     id: 3,
                     username: 'zakafofo',
-                    password: this.hashPassword('123456'), // Senha com hash
+                    password: this.hashPassword('123456'),
                     name: 'Zakafofo'
                 }
             ];
             localStorage.setItem('saep_users', JSON.stringify(defaultUsers));
         }
-
-        // Adicionar produtos de exemplo se não existirem
         const products = this.getProducts();
         if (products.length === 0) {
             this.addExampleProducts();
         }
     }
 
-    // Função simples de hash para senhas
     hashPassword(password) {
-        // Hash simples (para produção, use bcrypt ou similar)
         let hash = 0;
         for (let i = 0; i < password.length; i++) {
             const char = password.charCodeAt(i);
             hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Converter para 32bit
+            hash = hash & hash;
         }
         return Math.abs(hash).toString(16);
     }
@@ -89,7 +78,7 @@ class SaepDB {
             },
             {
                 name: "Viga de Aço H 200mm",
-                category: "Ferro e Aço", 
+                category: "Ferro e Aço",
                 stock: 8,
                 price: 245.50,
                 description: "Viga de aço estrutural H 200mm"
@@ -104,7 +93,7 @@ class SaepDB {
             {
                 name: "Tijolo Comum 6 Furos",
                 category: "Tijolos e Blocos",
-                stock: 3,  // Estoque baixo para testar alerta
+                stock: 3,
                 price: 0.85,
                 description: "Tijolo cerâmico comum 9x14x19cm"
             }
@@ -117,7 +106,6 @@ class SaepDB {
 
         localStorage.setItem('saep_products', JSON.stringify(exampleProducts));
 
-        // Adicionar algumas movimentações de exemplo
         const movements = [
             {
                 id: Date.now() + 1000,
@@ -143,10 +131,8 @@ class SaepDB {
         console.log('Dados de exemplo criados com sucesso!');
     }
 
-    // Gerenciamento de usuários
     async authenticateUser(username, password) {
         try {
-            // Tentar autenticar via API MySQL primeiro
             const response = await fetch('backend/api/auth.php', {
                 method: 'POST',
                 headers: {
@@ -157,7 +143,6 @@ class SaepDB {
                     password: password
                 })
             });
-            
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
@@ -173,8 +158,6 @@ class SaepDB {
         } catch (error) {
             console.error('Erro ao conectar com API de autenticação:', error);
         }
-        
-        // Fallback: tentar localStorage se API falhar
         console.log('Tentando autenticação via localStorage...');
         const users = JSON.parse(localStorage.getItem('saep_users') || '[]');
         const hashedPassword = this.hashPassword(password);
@@ -184,7 +167,6 @@ class SaepDB {
             console.log('Autenticação localStorage bem-sucedida:', user);
             return true;
         }
-        
         console.error('Falha na autenticação em ambos os métodos');
         return false;
     }
@@ -201,23 +183,18 @@ class SaepDB {
         return localStorage.getItem('saep_current_user') !== null;
     }
 
-    // Gerenciamento de produtos
     getProducts() {
         return JSON.parse(localStorage.getItem('saep_products') || '[]');
     }
 
     async addProduct(product) {
         console.log('Adicionando produto:', product);
-        
-        // Primeiro salvar no localStorage
         const products = this.getProducts();
         product.id = Date.now();
         product.stock = parseInt(product.stock) || 0;
         product.createdAt = new Date().toISOString();
         products.push(product);
         localStorage.setItem('saep_products', JSON.stringify(products));
-        
-        // Tentar salvar no MySQL via API
         try {
             const response = await fetch('backend/api/products.php', {
                 method: 'POST',
@@ -233,12 +210,10 @@ class SaepDB {
                     estoque_minimo: 5
                 })
             });
-            
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
                     console.log('Produto salvo no MySQL com sucesso! ID:', result.id);
-                    // Atualizar o produto no localStorage com o ID do MySQL
                     product.mysqlId = result.id;
                     localStorage.setItem('saep_products', JSON.stringify(products));
                 } else {
@@ -250,22 +225,17 @@ class SaepDB {
         } catch (error) {
             console.error('Erro ao conectar com a API:', error);
         }
-        
         return product;
     }
 
     async updateProduct(id, updatedProduct) {
         console.log('Atualizando produto ID:', id, 'Dados:', updatedProduct);
-        
-        // Atualizar no localStorage primeiro
         const products = this.getProducts();
         const index = products.findIndex(p => p.id === parseInt(id));
         if (index !== -1) {
             products[index] = { ...products[index], ...updatedProduct };
             localStorage.setItem('saep_products', JSON.stringify(products));
         }
-        
-        // Tentar atualizar no MySQL via API
         try {
             const response = await fetch('backend/api/products.php', {
                 method: 'PUT',
@@ -283,7 +253,6 @@ class SaepDB {
                     estoque_minimo: 5
                 })
             });
-            
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
@@ -297,14 +266,11 @@ class SaepDB {
         } catch (error) {
             console.error('Erro ao conectar com a API para atualizar produto:', error);
         }
-        
         return index !== -1 ? products[index] : null;
     }
 
     async deleteProduct(id) {
         console.log('Excluindo produto ID:', id);
-        
-        // Excluir do localStorage primeiro
         const products = this.getProducts();
         const index = products.findIndex(p => p.id === parseInt(id));
         let deletedProduct = null;
@@ -313,8 +279,6 @@ class SaepDB {
             products.splice(index, 1);
             localStorage.setItem('saep_products', JSON.stringify(products));
         }
-        
-        // Tentar excluir do MySQL via API
         try {
             const response = await fetch(`backend/api/products.php?id=${id}`, {
                 method: 'DELETE',
@@ -322,7 +286,6 @@ class SaepDB {
                     'Content-Type': 'application/json'
                 }
             });
-            
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
@@ -336,7 +299,6 @@ class SaepDB {
         } catch (error) {
             console.error('Erro ao conectar com a API para excluir produto:', error);
         }
-        
         return deletedProduct;
     }
 
@@ -345,7 +307,6 @@ class SaepDB {
         return products.find(p => p.id === parseInt(id));
     }
 
-    // Gerenciamento de movimentações
     getMovements() {
         return JSON.parse(localStorage.getItem('saep_movements') || '[]');
     }
@@ -364,10 +325,8 @@ class SaepDB {
     }
 }
 
-// Instância global do banco de dados
 const db = new SaepDB();
 
-// Utilitários gerais
 const Utils = {
     formatDate(dateString) {
         const date = new Date(dateString);
@@ -388,7 +347,6 @@ const Utils = {
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
-        
         const container = document.querySelector('.container, .container-fluid');
         if (container) {
             container.insertBefore(alertDiv, container.firstChild);
@@ -424,7 +382,6 @@ const Utils = {
     }
 };
 
-// Sistema de Login
 const Login = {
     setupLoginForm() {
         const loginForm = document.getElementById('loginForm');
@@ -435,16 +392,12 @@ const Login = {
 
     async handleLogin(e) {
         e.preventDefault();
-        
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
-        
-        // Desabilitar botão de login temporariamente
         const submitBtn = e.target.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
         submitBtn.textContent = 'Verificando...';
-
         try {
             const success = await db.authenticateUser(username, password);
             if (success) {
@@ -456,20 +409,16 @@ const Login = {
             console.error('Erro durante login:', error);
             Utils.showAlert('Erro durante o login. Tente novamente.', 'danger');
         } finally {
-            // Reabilitar botão
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
         }
     }
 };
 
-// Sistema de Navegação
 const Navigation = {
     init() {
         const currentPage = window.location.pathname.split('/').pop();
         this.updateActiveLink(currentPage);
-        
-        // Adicionar evento de logout se o botão existir
         const logoutBtn = document.querySelector('[onclick="logout()"]');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', this.handleLogout);
@@ -494,53 +443,42 @@ const Navigation = {
     }
 };
 
-// Sistema do Dashboard
 const Dashboard = {
     init() {
         console.log('Dashboard.init: Iniciando...');
-        
         if (!Utils.checkAuthentication()) {
             console.log('Falha na autenticação');
             return;
         }
-        
         this.loadStats();
         this.loadLowStockAlerts();
         this.loadLastMovements();
-        
         console.log('Dashboard.init: Concluído');
     },
 
     loadStats() {
         console.log('Dashboard.loadStats: Carregando estatísticas...');
-        
         try {
             const products = db.getProducts();
             const movements = db.getMovements();
-            
             console.log('Produtos encontrados:', products.length);
             console.log('Movimentações encontradas:', movements.length);
-            
             const stats = {
                 totalProducts: products.length,
                 lowStockProducts: products.filter(p => (parseInt(p.stock) || 0) < 5).length,
                 totalMovements: movements.length,
                 totalStock: products.reduce((sum, p) => sum + (parseInt(p.stock) || 0), 0)
             };
-            
             console.log('Estatísticas calculadas:', stats);
-            
-            // Atualizar elementos
             this.updateElement('totalProducts', stats.totalProducts);
             this.updateElement('lowStockProducts', stats.lowStockProducts);
             this.updateElement('totalMovements', stats.totalMovements);
             this.updateElement('totalStock', stats.totalStock);
-            
         } catch (error) {
             console.error('Erro ao carregar estatísticas:', error);
         }
     },
-    
+
     updateElement(id, value) {
         const element = document.getElementById(id);
         if (element) {
@@ -554,14 +492,11 @@ const Dashboard = {
     loadLowStockAlerts() {
         const lowStockProducts = db.getLowStockProducts();
         const alertsContainer = document.getElementById('lowStockAlerts');
-        
         if (!alertsContainer) return;
-
         if (lowStockProducts.length === 0) {
             alertsContainer.innerHTML = '<p class="text-center text-muted">Nenhum produto com estoque baixo.</p>';
             return;
         }
-
         const alertsHTML = lowStockProducts.map(product => `
             <div class="d-flex align-items-center py-2 border-bottom">
                 <div class="flex-grow-1">
@@ -571,21 +506,17 @@ const Dashboard = {
                 <span class="badge bg-warning">Baixo</span>
             </div>
         `).join('');
-
         alertsContainer.innerHTML = alertsHTML;
     },
 
     loadLastMovements() {
-        const movements = db.getMovements().slice(-5).reverse(); // Últimas 5
+        const movements = db.getMovements().slice(-5).reverse();
         const movementsContainer = document.getElementById('lastMovements');
-        
         if (!movementsContainer) return;
-
         if (movements.length === 0) {
             movementsContainer.innerHTML = '<p class="text-center text-muted">Nenhuma movimentação encontrada.</p>';
             return;
         }
-
         const movementsHTML = movements.map(movement => `
             <tr>
                 <td>${Utils.formatDate(movement.date)}</td>
@@ -598,117 +529,19 @@ const Dashboard = {
                 <td>${movement.quantity}</td>
             </tr>
         `).join('');
-
         movementsContainer.innerHTML = movementsHTML;
     }
 };
 
-// Sistema de Produtos
 const Products = {
     init() {
         console.log('Products.init: Iniciando...');
-        
         if (!Utils.checkAuthentication()) {
             console.log('Falha na autenticação');
             return;
         }
-        
         this.loadProducts();
         this.setupEventListeners();
-    },
-
-    loadProducts() {
-        const products = db.getProducts();
-        const tbody = document.getElementById('productsTable');
-        
-        if (!tbody) return;
-
-        if (products.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhum produto cadastrado.</td></tr>';
-            return;
-        }
-
-        const productsHTML = products.map(product => `
-            <tr>
-                <td>${product.name}</td>
-                <td>${product.category}</td>
-                <td>${product.stock}</td>
-                <td>${Utils.formatCurrency(product.price)}</td>
-                <td>${Utils.formatDate(product.createdAt)}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary" onclick="Products.editProduct(${product.id})">
-                        Editar
-                    </button>
-                    <button class="btn btn-sm btn-danger ms-1" onclick="Products.deleteProduct(${product.id})">
-                        Excluir
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-
-        tbody.innerHTML = productsHTML;
-    },
-
-    setupEventListeners() {
-        const addBtn = document.getElementById('addProductBtn');
-        if (addBtn) {
-            addBtn.addEventListener('click', () => this.showProductModal());
-        }
-        
-        // Adicionar eventos de busca
-        const searchInput = document.getElementById('searchProduct');
-        const clearBtn = document.getElementById('clearSearch');
-        
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => this.filterProducts(e.target.value));
-        }
-        
-        if (clearBtn) {
-            clearBtn.addEventListener('click', () => {
-                searchInput.value = '';
-                this.filterProducts('');
-            });
-        }
-    },
-    
-    filterProducts(searchTerm) {
-        const products = db.getProducts();
-        const filteredProducts = products.filter(product => 
-            product.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        
-        this.renderProducts(filteredProducts);
-    },
-    
-    renderProducts(products) {
-        const tbody = document.getElementById('productsTable');
-        
-        if (!tbody) return;
-
-        if (products.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhum produto encontrado.</td></tr>';
-            return;
-        }
-
-        const productsHTML = products.map(product => `
-            <tr>
-                <td>${product.name}</td>
-                <td>${product.category}</td>
-                <td>${product.stock}</td>
-                <td>${Utils.formatCurrency(product.price)}</td>
-                <td>${Utils.formatDate(product.createdAt)}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary" onclick="Products.editProduct(${product.id})">
-                        Editar
-                    </button>
-                    <button class="btn btn-sm btn-danger ms-1" onclick="Products.deleteProduct(${product.id})">
-                        Excluir
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-
-        tbody.innerHTML = productsHTML;
     },
 
     loadProducts() {
@@ -716,10 +549,62 @@ const Products = {
         this.renderProducts(products);
     },
 
+    setupEventListeners() {
+        const addBtn = document.getElementById('addProductBtn');
+        if (addBtn) {
+            addBtn.addEventListener('click', () => this.showProductModal());
+        }
+        const searchInput = document.getElementById('searchProduct');
+        const clearBtn = document.getElementById('clearSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => this.filterProducts(e.target.value));
+        }
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                this.filterProducts('');
+            });
+        }
+    },
+
+    filterProducts(searchTerm) {
+        const products = db.getProducts();
+        const filteredProducts = products.filter(product =>
+            product.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        this.renderProducts(filteredProducts);
+    },
+
+    renderProducts(products) {
+        const tbody = document.getElementById('productsTable');
+        if (!tbody) return;
+        if (products.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhum produto encontrado.</td></tr>';
+            return;
+        }
+        const productsHTML = products.map(product => `
+            <tr>
+                <td>${product.name}</td>
+                <td>${product.category}</td>
+                <td>${product.stock}</td>
+                <td>${Utils.formatCurrency(product.price)}</td>
+                <td>${Utils.formatDate(product.createdAt)}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick="Products.editProduct(${product.id})">
+                        Editar
+                    </button>
+                    <button class="btn btn-sm btn-danger ms-1" onclick="Products.deleteProduct(${product.id})">
+                        Excluir
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+        tbody.innerHTML = productsHTML;
+    },
+
     showProductModal(productId = null) {
         const modal = new bootstrap.Modal(document.getElementById('productModal'));
         const modalTitle = document.getElementById('productModalLabel');
-        
         if (productId) {
             modalTitle.textContent = 'Editar Produto';
             this.populateForm(productId);
@@ -727,7 +612,6 @@ const Products = {
             modalTitle.textContent = 'Adicionar Produto';
             this.clearForm();
         }
-        
         modal.show();
     },
 
@@ -749,25 +633,18 @@ const Products = {
 
     async saveProduct() {
         const formData = this.getFormData();
-        
         if (!this.validateForm(formData)) {
             return;
         }
-
         const productId = document.getElementById('productId').value;
-        
         try {
             if (productId) {
-                // Editar produto existente
                 db.updateProduct(productId, formData);
                 Utils.showAlert('Produto atualizado com sucesso!', 'success');
             } else {
-                // Adicionar novo produto
                 await db.addProduct(formData);
                 Utils.showAlert('Produto adicionado com sucesso no sistema e banco de dados!', 'success');
             }
-
-            // Fechar modal e recarregar lista
             const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
             modal.hide();
             this.loadProducts();
@@ -812,16 +689,13 @@ const Products = {
     }
 };
 
-// Sistema de Movimentações
 const Movements = {
     init() {
         console.log('Movements.init: Iniciando...');
-        
         if (!Utils.checkAuthentication()) {
             console.log('Falha na autenticação');
             return;
         }
-        
         this.loadProducts();
         this.loadMovementHistory();
         this.setupEventListeners();
@@ -830,33 +704,25 @@ const Movements = {
     loadProducts() {
         const products = db.getProducts();
         const select = document.getElementById('productSelect');
-        
         if (!select) return;
-
-        // Limpar opções existentes, mantendo a primeira
         select.innerHTML = '<option value="">Selecione um produto...</option>';
-        
         products.forEach(product => {
             const option = document.createElement('option');
             option.value = product.id;
             option.textContent = `${product.name} (Estoque: ${product.stock})`;
             select.appendChild(option);
         });
-        
         console.log(`Carregados ${products.length} produtos no select`);
     },
 
     loadMovementHistory() {
-        const movements = db.getMovements().slice(-10).reverse(); // Últimas 10
+        const movements = db.getMovements().slice(-10).reverse();
         const tbody = document.getElementById('movementHistory');
-        
         if (!tbody) return;
-
         if (movements.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhuma movimentação encontrada.</td></tr>';
             return;
         }
-
         const movementsHTML = movements.map(movement => `
             <tr>
                 <td>${Utils.formatDate(movement.date)}</td>
@@ -870,7 +736,6 @@ const Movements = {
                 <td>${movement.description || '-'}</td>
             </tr>
         `).join('');
-
         tbody.innerHTML = movementsHTML;
     },
 
@@ -883,31 +748,24 @@ const Movements = {
 
     handleSubmit(e) {
         e.preventDefault();
-        
         const productId = parseInt(document.getElementById('productSelect').value);
         const type = document.getElementById('movementType').value;
         const quantity = parseInt(document.getElementById('quantity').value);
         const date = document.getElementById('movementDate').value;
         const reason = document.getElementById('reason').value;
-        
         if (!productId || !type || !quantity) {
             Utils.showAlert('Preencha todos os campos obrigatórios!', 'danger');
             return;
         }
-        
         const product = db.getProduct(productId);
         if (!product) {
             Utils.showAlert('Produto não encontrado!', 'danger');
             return;
         }
-        
-        // Verificar estoque para saída
         if (type === 'saida' && quantity > product.stock) {
             Utils.showAlert(`Estoque insuficiente! Disponível: ${product.stock}`, 'danger');
             return;
         }
-        
-        // Criar movimentação
         const movement = {
             productId: productId,
             productName: product.name,
@@ -916,25 +774,17 @@ const Movements = {
             date: date,
             description: reason
         };
-        
-        // Salvar movimentação
         db.addMovement(movement);
-        
-        // Atualizar estoque do produto
-        const newStock = type === 'entrada' 
-            ? product.stock + quantity 
+        const newStock = type === 'entrada'
+            ? product.stock + quantity
             : product.stock - quantity;
-            
         db.updateProduct(productId, { stock: newStock });
-        
         Utils.showAlert('Movimentação registrada com sucesso!', 'success');
-        
-        // Limpar formulário e recarregar
         this.clearForm();
         this.loadProducts();
         this.loadMovementHistory();
     },
-    
+
     clearForm() {
         document.getElementById('movementForm').reset();
         document.getElementById('movementDate').value = new Date().toISOString().split('T')[0];
@@ -957,7 +807,6 @@ function resetExampleData() {
     }
 }
 
-// Funções para a página de estoque
 function loadProducts() {
     Movements.loadProducts();
 }
@@ -974,12 +823,9 @@ function clearForm() {
     Movements.clearForm();
 }
 
-// Inicialização baseada na página atual
 document.addEventListener('DOMContentLoaded', function() {
     const currentPage = window.location.pathname.split('/').pop();
-    
     console.log('Página atual:', currentPage);
-    
     switch (currentPage) {
         case 'index.php':
             setupLoginForm();

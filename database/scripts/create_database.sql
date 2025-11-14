@@ -1,17 +1,7 @@
--- ================================================
--- SISTEMA DE GERENCIAMENTO DE ESTOQUE SAEP
--- Script Simplificado do Banco de Dados
--- Data: 14/11/2025
--- ================================================
-
--- Criar banco de dados
 DROP DATABASE IF EXISTS saep_db;
 CREATE DATABASE saep_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE saep_db;
 
--- ================================================
--- TABELA: usuarios
--- ================================================
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -20,18 +10,12 @@ CREATE TABLE usuarios (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ================================================
--- TABELA: categorias
--- ================================================
 CREATE TABLE categorias (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     descricao TEXT
 );
 
--- ================================================
--- TABELA: produtos
--- ================================================
 CREATE TABLE produtos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
@@ -43,13 +27,9 @@ CREATE TABLE produtos (
     data_validade DATE,
     descricao TEXT,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 );
 
--- ================================================
--- TABELA: movimentacoes_estoque
--- ================================================
 CREATE TABLE movimentacoes_estoque (
     id INT AUTO_INCREMENT PRIMARY KEY,
     produto_id INT NOT NULL,
@@ -58,16 +38,10 @@ CREATE TABLE movimentacoes_estoque (
     quantidade INT NOT NULL,
     motivo VARCHAR(200),
     data_movimentacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     FOREIGN KEY (produto_id) REFERENCES produtos(id),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
 
--- ================================================
--- DADOS INICIAIS
--- ================================================
-
--- Usuários do sistema (5 usuários)
 INSERT INTO usuarios (username, password, nome) VALUES 
 ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrador'),
 ('peluxo', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Peluxo'),
@@ -75,7 +49,6 @@ INSERT INTO usuarios (username, password, nome) VALUES
 ('maria_silva', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Maria Silva'),
 ('carlos_santos', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Carlos Santos');
 
--- Categorias de materiais de construção (conforme frontend)
 INSERT INTO categorias (nome, descricao) VALUES 
 ('Cimento e Argamassa', 'Cimentos, argamassas e materiais de ligação'),
 ('Tijolos e Blocos', 'Tijolos cerâmicos, blocos de concreto e vedação'),
@@ -85,14 +58,12 @@ INSERT INTO categorias (nome, descricao) VALUES
 ('Tubos e Conexões', 'Tubulações hidráulicas, elétricas e conexões'),
 ('Outros', 'Materiais diversos para construção');
 
--- Produtos de exemplo - Materiais de Construção (conforme dados do frontend)
 INSERT INTO produtos (nome, categoria_id, unidade_medida, quantidade_disponivel, estoque_minimo, preco_unitario, data_validade, descricao) VALUES 
 ('Telhado Cerâmico Português', 5, 'Unidade', 150, 20, 2.80, NULL, 'Telha cerâmica modelo português'),
 ('Viga de Aço H 200mm', 3, 'Metro', 8, 5, 245.50, NULL, 'Viga de aço estrutural H 200mm'),
 ('Arame Galvanizado 14 BWG', 3, 'Quilograma', 25, 15, 18.90, NULL, 'Rolo de arame galvanizado calibre 14'),
 ('Tijolo Comum 6 Furos', 2, 'Unidade', 3, 5, 0.85, NULL, 'Tijolo cerâmico comum 9x14x19cm');
 
--- Movimentações de exemplo (conforme dados do frontend)
 INSERT INTO movimentacoes_estoque (produto_id, usuario_id, tipo_movimentacao, quantidade, motivo) VALUES 
 (1, 1, 'entrada', 150, 'Estoque inicial - Admin'),
 (2, 2, 'entrada', 8, 'Compra de vigas - Peluxo'),

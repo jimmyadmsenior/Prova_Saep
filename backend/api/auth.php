@@ -34,7 +34,6 @@ class AuthAPI {
                 throw new Exception('Erro de conexão com o banco');
             }
             
-            // Buscar usuário no banco
             $stmt = $conn->prepare("SELECT id, username, password, nome FROM usuarios WHERE username = ?");
             $stmt->execute([$username]);
             $user = $stmt->fetch();
@@ -43,7 +42,6 @@ class AuthAPI {
                 throw new Exception('Usuário não encontrado');
             }
             
-            // Verificar senha
             if (password_verify($password, $user['password'])) {
                 echo json_encode([
                     'success' => true,
